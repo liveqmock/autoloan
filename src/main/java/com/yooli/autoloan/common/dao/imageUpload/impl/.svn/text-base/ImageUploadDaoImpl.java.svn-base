@@ -1,0 +1,264 @@
+/* 
+ * Copyright (C) 2006-2012 普信恒业科技发展（北京）有限公司.
+ *
+ * 本系统是商用软件,未经授权擅自复制或传播本程序的部分或全部将是非法的.
+ *
+ * ============================================================
+ *
+ * FileName: ImageUpload.java 
+ *
+ * Created: [2012-9-5 上午10:08:19] by pgq 
+ *
+ * $Id$
+ * 
+ * $Revision$
+ *
+ * $Author$
+ *
+ * $Date$
+ *
+ * ============================================================ 
+ * 
+ * ProjectName: AutoLoan 
+ * 
+ * Description: 
+ * 
+ * ==========================================================*/
+
+package com.creditease.website.common.dao.imageUpload.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+import com.creditease.website.common.dao.ibatis.IBatisBaseDao;
+import com.creditease.website.common.dao.imageUpload.IimageUploadDao;
+import com.creditease.website.common.domain.ApplyUploadRel;
+import com.creditease.website.common.domain.FilePath;
+import com.creditease.website.common.domain.UploadRecord;
+
+/** 
+ *
+ * Description: 
+ *
+ * @author pgq
+ * @version 1.0
+ * <pre>
+ * Modification History: 
+ * Date         Author      Version     Description 
+ * ------------------------------------------------------------------ 
+ * 2012-9-5    pgq       1.0        1.0 Version 
+ * </pre>
+ */
+@Component
+public class ImageUploadDaoImpl extends IBatisBaseDao implements IimageUploadDao {
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-5 上午10:59:47
+	 */
+	public void uploadRecord(Map<String, String> map){
+		this.getSqlMapClientTemplate().update("", map);
+	}
+	
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-5 上午10:59:47
+	 */
+	public void uploadApplyUploadRel(Map<String, String> map){
+		this.getSqlMapClientTemplate().update("", map);
+	}
+	
+	
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-5 上午10:59:47
+	 */
+	public Integer getCountFile(String applyID){
+		return (Integer)this.getSqlMapClientTemplate().queryForObject("",applyID);
+	}
+	
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-5 上午10:59:47
+	 */
+	public List<UploadRecord> getRecordInfoByApplyID(String applyID){
+		return this.getSqlMapClientTemplate().queryForList("", applyID);
+	}
+	
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-5 上午10:59:47
+	 */
+	public UploadRecord getRecordInfoByID(Integer idnumber){
+		return (UploadRecord)this.getSqlMapClientTemplate().queryForObject("",idnumber);
+	}
+
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-5 上午11:14:33
+	 */
+	@Override
+	public List<ApplyUploadRel> getApplyPath(ApplyUploadRel applyUploadRel) {
+		return this.getSqlMapClientTemplate().queryForList("imageDaoview.getimagepath", applyUploadRel);
+	}
+
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-5 上午11:48:39
+	 */
+	@Override
+	public Long saveUploadRecord(UploadRecord uploadRecord) {
+		return (Long)this.getSqlMapClientTemplate().insert("imageDaoview.seavRecord", uploadRecord);
+	}
+
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-5 下午06:46:25
+	 */
+	@Override
+	public void saveAppUploadRel(ApplyUploadRel appUploadRel) {
+		this.getSqlMapClientTemplate().insert("imageDaoview.saveapplyUploadRel", appUploadRel);
+	}
+
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-6 下午05:21:38
+	 */
+	@Override
+	public void deleteApplyUploadRelByid(String appluRelID) {
+		this.getSqlMapClientTemplate().delete("imageDaoview.deleteimageByid",appluRelID);
+	}
+
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-14 上午11:37:26
+	 */
+	@Override
+	public Integer countUploadImage(ApplyUploadRel applyUploadRel) {
+		return (Integer)this.getSqlMapClientTemplate().queryForObject("imageDaoview.countUploadFile", applyUploadRel);
+	}
+
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-11-21 上午11:19:13
+	 */
+	@Override
+	public ApplyUploadRel getApplyUploadRelById(Long uploadrelID) {
+		ApplyUploadRel applyUploadRel = new ApplyUploadRel();
+		applyUploadRel.setId(uploadrelID);
+		return (ApplyUploadRel)this.getSqlMapClientTemplate().queryForObject("imageDaoview.getimagepathbyid",applyUploadRel);
+	}
+	
+	/**
+	 * Description: 删除该进件的某一类型图片
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author jiexu
+	 * Create Date: 2012-12-7 上午10:27:33
+	 */
+	@Override
+	public void deleteImageByAttachtype(ApplyUploadRel applyUploadRel) {
+		this.getSqlMapClientTemplate().delete("imageDaoview.deleteimageByAttachtype", applyUploadRel);
+	}
+
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2013-1-14 下午03:29:19
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<ApplyUploadRel> getApplyUploadRelsByID(String idList) {
+		return this.getSqlMapClientTemplate().queryForList("imageDaoview.getuploadlistbyids", idList);
+	}
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	* Description
+	*  新增文件
+	*@return 
+	*@author wgs
+	*@createTime 2013-11-6
+	*/
+	@Override
+	public void insertIntoFilePath(FilePath filePath) {
+		this.getSqlMapClientTemplate().insert("imageDaoview.insertIntoFilePath", filePath);
+		
+	}
+	/**
+	* Description
+	*  删除文件
+	*@return 
+	*@author wgs
+	*@createTime 2013-11-6
+	*/
+	@Override
+	public Integer deleteFilePath(FilePath filePath) {
+		// TODO Auto-generated method stub
+		return this.getSqlMapClientTemplate().delete("imageDaoview.deleteFilePath", filePath);
+	}
+	
+	
+	/**
+	* Description
+	*  获取文件路径集合
+	*@return 
+	*@author wgs
+	*@createTime 2013-11-6
+	*/
+	@SuppressWarnings("unchecked")
+	public List<FilePath> getFilePathByFilePath(FilePath filePath){
+		return this.getSqlMapClientTemplate().queryForList("imageDaoview.fandFilePath",filePath);
+	}
+	
+}

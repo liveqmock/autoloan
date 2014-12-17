@@ -1,0 +1,70 @@
+.onShow
+{ 
+height:22px;
+background:#F3EDFF url(../images/onShow.gif) no-repeat 0px 1px; 
+padding-left:25px;
+padding-right:5px; 
+margin-left:10px; 
+line-height:22px; 
+position:absolute;
+white-space:nowrap;
+}
+.onFocus
+{ 	
+background:#E9F0FF url(../images/onFocus.gif) no-repeat 0px 1px; 
+padding-left:25px;
+padding-right:5px; 
+margin-left:10px; 
+line-height:22px; 
+position:absolute;
+white-space:nowrap;
+}
+.onError
+{ 	
+background:#FFF2E9 url(../images/onError.gif) no-repeat 0px 1px;
+padding-left:25px;
+padding-right:5px; 
+margin-left:10px; 
+line-height:22px; 
+position:absolute;
+white-space:nowrap;
+}
+.onCorrect
+{	
+background:#E9FFEB url(../images/onCorrect.gif) no-repeat 0px 1px;
+padding-left:25px;
+padding-right:5px; 
+margin-left:10px; 
+line-height:22px; 
+position:absolute;
+white-space:nowrap;
+	  
+}
+.onLoad
+{	
+background:#E9FFEB url(../images/onLoad.gif) no-repeat 3px 3px;
+padding-left:25px;
+padding-right:5px; 
+margin-left:10px; 
+line-height:22px; 
+position:absolute;
+white-space:nowrap;
+} 
+.input_public
+{
+border:#C1C1C1 1px solid;height:20px;padding-left:4px;
+}
+
+.input_error {
+	background-color:#FBE2E2;border-color:#D28C8C;color:#A63B3B
+}
+.input_focus {
+    background-color:#FFC;border-color:#C6C69E
+}
+.input_correct {
+	background-color:#FBFBFB;color:#444
+}
+.inputOnShow
+{
+	color: #999999
+}

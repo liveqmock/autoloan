@@ -1,0 +1,37 @@
+package com.creditease.website.common.util;
+
+import java.text.DecimalFormat;
+
+/**
+* Description
+*  小数位数相关计算类
+* 
+*@author wgs
+*@createTime 2013-10-15上午11:38:53
+*/
+public class PointUtil {
+	/**
+	* Description
+	*  Double小数，1位补0,2位补动
+	*@return String
+	*@author wgs
+	*@createTime 2013-10-15
+	*/
+	public  String getPointForpoint(Double a){
+		String pointValue=a.toString();
+		//从小数位后开始截取
+		String newpontValue=pointValue.substring(pointValue.lastIndexOf(".")+1, pointValue.length());
+		//两位小数原样返回
+		if(newpontValue.length()==2){
+			return pointValue;
+		//一位小数补0
+		}else if(newpontValue.length()==1){
+			return pointValue+"0";
+		}else if(newpontValue.length()>2){
+			DecimalFormat df = new DecimalFormat("########.00");
+	        return df.format(a);
+		}
+		return pointValue;
+	}
+
+}

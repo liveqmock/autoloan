@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE abatorConfiguration PUBLIC "-//Apache Software Foundation//DTD Abator for iBATIS Configuration 1.0//EN" "http://ibatis.apache.org/dtd/abator-config_1_0.dtd" >
+<abatorConfiguration >
+  <abatorContext >
+    <jdbcConnection driverClass="oracle.jdbc.driver.OracleDriver" connectionURL="jdbc:oracle:thin:@(description=(address_list= (address=(host=10.100.31.193) (protocol=tcp)(port=1521))(address=(host=10.100.31.193)(protocol=tcp) (port=1521)) (failover=yes))(connect_data=(service_name=cedb )))" 
+     userId="vdss" password="Y6jf9Zdm" >
+      <classPathEntry location="D:\eclipseWorkSpase\VDSS\WebContent\WEB-INF\lib\ojdbc6.jar" />
+    </jdbcConnection>
+    <javaModelGenerator targetPackage="com.creditease.dealeras.createFiles" targetProject="VDSS" />
+    <sqlMapGenerator targetPackage="com.creditease.dealeras.createFiles" targetProject="VDSS" />
+    <daoGenerator targetPackage="com.creditease.dealeras.createFiles" targetProject="VDSS" type="SPRING" />
+    <table schema="vdss" tableName="vd_file_path" >
+      <columnOverride column="id" property="id" />
+    </table>
+    <table schema="vdss" tableName="vd_nc_result" >
+      <columnOverride column="id" property="id" />
+    </table>
+     <table schema="vdss" tableName="vd_client" >
+      <columnOverride column="id" property="id" />
+    </table>
+     <table schema="vdss" tableName="vd_Detectl_result" >
+      <columnOverride column="id" property="id" />
+    </table>
+    <table schema="vdss" tableName="vd_Detectl_items" >
+      <columnOverride column="id" property="id" />
+    </table>
+     <table schema="vdss" tableName="vd_approvalflow" >
+      <columnOverride column="id" property="id" />
+    </table>
+     <table schema="vdss" tableName="vd_CAR_SERIES" >
+      <columnOverride column="id" property="id" />
+    </table>
+     <table schema="vdss" tableName="vd_CAR_BRAND" >
+      <columnOverride column="id" property="id" />
+    </table>
+     <table schema="vdss" tableName="vd_vehicle" >
+      <columnOverride column="id" property="id" />
+    </table>
+     <table schema="vdss" tableName="vd_technology" >
+      <columnOverride column="id" property="id" />
+    </table>
+      <table schema="vdss" tableName="vd_order" >
+      <columnOverride column="id" property="id" />
+    </table>
+  </abatorContext>
+</abatorConfiguration>

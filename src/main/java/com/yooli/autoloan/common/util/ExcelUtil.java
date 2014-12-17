@@ -1,0 +1,650 @@
+package com.yooli.autoloan.common.util;
+
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+/**
+ * 
+ * Description:
+ * 
+ * @author yyh
+ * @version 1.0
+ * 
+ * <pre>
+ * Modification History: 
+ * Date         Author      Version     Description 
+ * ------------------------------------------------------------------ 
+ * 2013-4-23         yyh 1.0        1.0 Version
+ * </pre>
+ */
+public class ExcelUtil {
+	/**
+	 * @author yyh
+	 * @param srcPath 文件路径
+	 * @param map 替换excel中的变量
+	 * @return excel
+	 * @throws IOException
+	 */
+	public static Workbook searchAndReplace(String srcPath,Map<String, Object> map) throws IOException {
+		 InputStream input = null;
+			Workbook   hwb = null;
+			Row row = null;// 行
+			Cell cell = null;// 列
+			   try {
+		            input = new BufferedInputStream(new FileInputStream(srcPath));
+		        }
+		        catch (FileNotFoundException e) {
+		            e.printStackTrace() ;
+		          
+		        }
+			try {
+				hwb = new XSSFWorkbook(input);
+	        } catch (Exception ex) {
+	        	hwb = new HSSFWorkbook(input);;
+	        }
+			
+			//hwb = new HSSFWorkbook(fileSystem);
+			Sheet sheet = hwb.getSheetAt(0);
+			
+			XSSFCellStyle cellStyle = null;
+			/**
+			if(tempType.equals(PrintTypeUtil.LOANAGREEMENT)){
+				XSSFFont f = (XSSFFont) hwb.createFont();
+				f.setBoldweight(XSSFFont.COLOR_NORMAL);
+				f.setFontHeightInPoints((short) 10); // 字体大小
+				 cellStyle = (XSSFCellStyle) hwb.createCellStyle();
+				cellStyle.setFont(f);
+			}
+			
+			*/
+			int rows = sheet.getLastRowNum();// 行数, base 0
+			int cols = -1;
+			//System.out.println("rows: " + (rows + 1));
+			for (int i = 0; i <= rows; i++) {// 遍历行
+				row = sheet.getRow(i);// 取得行
+				if(row!=null){
+				cols = row.getLastCellNum();// 取得最后一列有序号 base 1
+			//	System.out.print("第[" + (i + 1) + "]行有[" + (cols) + "]列(base 1): ");
+				for (int j = 0; j < cols; j++) {// 遍历列
+					cell = row.getCell(j);
+				//	System.out.print("j"+j);
+					Object value = null;
+					if (null != cell) {
+						/**
+						if(tempType.equals(PrintTypeUtil.LOANAGREEMENT)){
+							cell.setCellStyle(cellStyle);
+						}
+						**/
+						switch (cell.getCellType()) {
+						case HSSFCell.CELL_TYPE_NUMERIC: // 数值型
+							if (HSSFDateUtil.isCellDateFormatted(cell)) {
+								// 如果是date类型则 ，获取该cell的date值
+								value = HSSFDateUtil.getJavaDate(cell.getNumericCellValue()).toString();
+								System.out.print(value);
+							} else {// 纯数字
+								value = cell.getNumericCellValue() + 1;// 数字加一
+							}
+							//System.out.print(value);
+							cell.setCellValue((Double) value);
+							break;
+						/* 此行表示单元格的内容为string类型 */
+						case HSSFCell.CELL_TYPE_STRING: // 字符串型
+							value = cell.getRichStringCellValue().toString();
+							//System.out.print(value);
+							break;
+						case HSSFCell.CELL_TYPE_FORMULA:// 公式型
+							// 读公式计算值
+							value = String.valueOf(cell.getNumericCellValue());
+							if (value.equals("NaN")) {// 如果获取的数据值为非法值,则转换为获取字符串
+								value = cell.getRichStringCellValue().toString();
+							}
+							// cell.getCellFormula();读公式
+							//System.out.print(value);
+							break;
+						case HSSFCell.CELL_TYPE_BOOLEAN:// 布尔
+							value = " " + cell.getBooleanCellValue();
+							//System.out.print(value);
+							break;
+						/* 此行表示该单元格值为空 */
+						case HSSFCell.CELL_TYPE_BLANK: // 空值
+							value = "";
+							//System.out.print(value);
+							break;
+						case HSSFCell.CELL_TYPE_ERROR: // 故障
+							value = "";
+							//System.out.print(value);
+							break;
+						default:
+							value = cell.getRichStringCellValue().toString();
+							//System.out.print(value);
+							
+						}
+//						for (Entry<String, Object> e : map.entrySet()) {
+//							if (value.equals(e.getKey())) {
+//								cell.setCellValue(map.get(value).toString());
+//							}
+//							else{
+//								cell.setCellValue("");
+//							}
+//						}	
+						if(value!=""){
+							String stuffex=value.toString().substring(0, 1);
+							if(stuffex.equals("$")){
+							if(map.get(value)!=null){
+								cell.setCellValue(map.get(value).toString());
+							}
+							else{
+								cell.setCellValue("");
+							}	
+						}
+					}
+						
+					}
+				}
+			}
+		}
+			
+			return hwb;
+	}
+	/**
+	 *@author yyh
+	 *@desc 将传入的对象的属性转换成替换excel中变量的map
+	 * @param obj 传入对象
+	 * @return map
+	 */
+	 public static Map<String,Object> transBeanMap(Object obj){  
+         
+	        Map<String,Object> map = new LinkedHashMap<String,Object>();  
+	        //key值 应该是 类中的属性名，利用反射机制  
+	        Field[] fields = obj.getClass().getDeclaredFields();  
+	        for(int i=0; i<fields.length; i++){  
+	            String field = fields[i].toString();  
+	            String[] keys = field.split("\\."); 
+	           String attrkey="${"+keys[keys.length-1]+"}";  
+	            String key = keys[keys.length-1];  
+	            char toUpperCase = (char)(key.charAt(0)-32);  
+	            String keyUpper = key.replace(key.charAt(0),toUpperCase);  
+	            Method getMethod;  
+	            try {  
+	            	//根据 field得到对应的get方法  
+	                getMethod = obj.getClass().getDeclaredMethod("get"+keyUpper);
+	                Object value = getMethod.invoke(obj);  
+	                map.put(attrkey, value);  
+	            } catch (NoSuchMethodException e) {  
+	                e.printStackTrace();  
+	            } catch (SecurityException e) {  
+	                e.printStackTrace();  
+	            }catch (IllegalAccessException e) {  
+	                e.printStackTrace();  
+	            } catch (IllegalArgumentException e) {  
+	                e.printStackTrace();  
+	            } catch (InvocationTargetException e) {  
+	                e.printStackTrace();  
+	            }         
+	        }  
+	        return map;  
+	    }  
+	 
+	 
+	 /**
+	  * 
+	  * Description: 
+	  * 写入数据输出时间表数据的方法
+	  * @param 
+	  * @return Workbook
+	  * @throws 
+	  * @Author Honest
+	  * Create Date: 2013-5-9 下午02:58:09
+	 
+	 public static Workbook searchAndReplace(String srcPath,List<DownloadStatistics> downloadStatistics) throws IOException {
+		 
+		 InputStream input = null;
+			Workbook   hwb = null;
+			Row row = null;// 行
+			Cell cell = null;// 列
+			   try {
+		            input = new BufferedInputStream(new FileInputStream(srcPath));
+		        }
+		        catch (FileNotFoundException e) {
+		            e.printStackTrace() ;
+		          
+		        }
+			try {
+				hwb = new XSSFWorkbook(input);
+	        } catch (Exception ex) {
+	        	hwb = new HSSFWorkbook(input);;
+	        }
+			//hwb = new HSSFWorkbook(fileSystem);
+			Sheet sheet = hwb.getSheetAt(0);
+			int rows = sheet.getLastRowNum()+downloadStatistics.size();// 行数, base 0
+			//int rows = downloadStatistics.size();// 行数, base 0
+			int cols = 54;
+			if(downloadStatistics.size()>0){
+			
+				for (int i = 2; i <= rows; i++) {// 遍历行
+				
+					row = sheet.createRow(i);// 取得行
+				
+					//System.out.print("第[" + (i + 1) + "]行有[" + (cols) + "]列(base 1): ");
+				
+					for (int j = 0; j < cols; j++) {// 遍历列
+						cell = row.createCell(j);
+						cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+					
+						if (null != cell) {
+						
+							DownloadStatistics	downloadStatistic =  downloadStatistics.get(i-2);
+							
+						
+							switch (j) {
+						
+							case 0:
+								if(downloadStatistic.getApplyId() != null){
+									cell.setCellValue(downloadStatistic.getApplyId());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 1:
+								if(downloadStatistic.getCity() != null){
+									cell.setCellValue(downloadStatistic.getCity());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 2:
+								if(downloadStatistic.getSalername() != null){
+									cell.setCellValue(downloadStatistic.getSalername());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 3:
+								if(downloadStatistic.getProductname() != null){
+									cell.setCellValue(downloadStatistic.getProductname() );
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 4:
+								if(downloadStatistic.getModels() != null){
+									cell.setCellValue(downloadStatistic.getModels());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 5:
+								if(downloadStatistic.getAssessSum() != null){
+									cell.setCellValue(downloadStatistic.getAssessSum());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 6:
+								if(downloadStatistic.getYear() != null){
+									cell.setCellValue(downloadStatistic.getYear());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 7:
+								if(downloadStatistic.getEndStatus() != null){
+									cell.setCellValue(downloadStatistic.getEndStatus());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 8:
+								if(downloadStatistic.getTeamRuler() != null){
+									cell.setCellValue(downloadStatistic.getTeamRuler());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 9:
+								if(downloadStatistic.getIsVIP() != null){
+									cell.setCellValue(downloadStatistic.getIsVIP());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 10:
+								if(downloadStatistic.getIsCreditFile() != null){
+									cell.setCellValue(downloadStatistic.getIsCreditFile());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 11:
+								if(downloadStatistic.getToAssTeamTime() != null){
+									cell.setCellValue(downloadStatistic.getToAssTeamTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 12:
+								if(downloadStatistic.getAssgnAssessTime() != null){
+									cell.setCellValue(downloadStatistic.getAssgnAssessTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 13:
+								if(downloadStatistic.getToAssessTime() != null){
+									cell.setCellValue(downloadStatistic.getToAssessTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 14:
+								if(downloadStatistic.getPassAssessTime() != null){
+									cell.setCellValue(downloadStatistic.getPassAssessTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 15:
+								if(downloadStatistic.getAssessResult() != null){
+									cell.setCellValue(downloadStatistic.getAssessResult());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 16:
+								if(downloadStatistic.getAssessUserCount() != null){
+									cell.setCellValue(downloadStatistic.getAssessUserCount());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 17:
+								if(downloadStatistic.getAppraiserName() != null){
+									cell.setCellValue(downloadStatistic.getAppraiserName());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 18:
+								if(downloadStatistic.getToAssistantTime() != null){
+									cell.setCellValue(downloadStatistic.getToAssistantTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 19:
+								if(downloadStatistic.getPassAssistantTime() != null){
+									cell.setCellValue(downloadStatistic.getPassAssistantTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 20:
+								if(downloadStatistic.getAssistantName() != null){
+									cell.setCellValue(downloadStatistic.getAssistantName());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 21:
+								if(downloadStatistic.getToFaceTeamTime() != null){
+									cell.setCellValue(downloadStatistic.getToFaceTeamTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 22:
+								if(downloadStatistic.getAssginFaceTime() != null){
+									cell.setCellValue(downloadStatistic.getAssginFaceTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 23:
+								if(downloadStatistic.getToFaceTime() != null){
+									cell.setCellValue(downloadStatistic.getToFaceTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 24:
+								if(downloadStatistic.getFaceUserCount() != null){
+									cell.setCellValue(downloadStatistic.getFaceUserCount());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 25:
+								if(downloadStatistic.getPassFaceTime() != null){
+									cell.setCellValue(downloadStatistic.getPassFaceTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 26:
+								if(downloadStatistic.getFaceSuspendTime() != null){
+									cell.setCellValue(downloadStatistic.getFaceSuspendTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 27:
+								if(downloadStatistic.getFaceReOpenTime() != null){
+									cell.setCellValue(downloadStatistic.getFaceReOpenTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 28:
+								if(downloadStatistic.getReplenishDes() != null){
+									cell.setCellValue(downloadStatistic.getReplenishDes());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 29:
+								if(downloadStatistic.getFaceName() != null){
+									cell.setCellValue(downloadStatistic.getFaceName());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 30:
+								if(downloadStatistic.getWattPricingTime() != null){
+									cell.setCellValue(downloadStatistic.getWattPricingTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 31:
+								if(downloadStatistic.getToPricTime() != null){
+									cell.setCellValue(downloadStatistic.getToPricTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 32:
+								if(downloadStatistic.getThatPricCount() != null){
+									cell.setCellValue(downloadStatistic.getThatPricCount());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 33:
+								if(downloadStatistic.getPassPricTime() != null){
+									cell.setCellValue(downloadStatistic.getPassPricTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 34:
+								if(downloadStatistic.getPricName() != null){
+									cell.setCellValue(downloadStatistic.getPricName());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 35:
+								if(downloadStatistic.getPricrebuckCount() != null){
+									cell.setCellValue(downloadStatistic.getPricrebuckCount());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 36:
+								if(downloadStatistic.getToFinTime() != null){
+									cell.setCellValue(downloadStatistic.getToFinTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 37:
+								if(downloadStatistic.getThatFinCount() != null){
+									cell.setCellValue(downloadStatistic.getThatFinCount());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 38:
+								if(downloadStatistic.getPassFinTime() != null){
+									cell.setCellValue(downloadStatistic.getPassFinTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 39:
+								if(downloadStatistic.getFinUserName() != null){
+									cell.setCellValue(downloadStatistic.getFinUserName());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 40:
+								if(downloadStatistic.getFinReBuckCount() != null){
+									cell.setCellValue(downloadStatistic.getFinReBuckCount());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 41:
+								if(downloadStatistic.getToContractTime() != null){
+									cell.setCellValue(downloadStatistic.getToContractTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 42:
+								if(downloadStatistic.getPassContractTime() != null){
+									cell.setCellValue(downloadStatistic.getPassContractTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 43:
+								if(downloadStatistic.getToInstallTime() != null){
+									cell.setCellValue(downloadStatistic.getToInstallTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 44:
+								if(downloadStatistic.getThatInstallCount() != null){
+									cell.setCellValue(downloadStatistic.getThatInstallCount());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 45:
+								if(downloadStatistic.getOverInstallTime() != null){
+									cell.setCellValue(downloadStatistic.getOverInstallTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 46:
+								if(downloadStatistic.getInstallName() != null){
+									cell.setCellValue(downloadStatistic.getInstallName());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 47:
+								if(downloadStatistic.getToReeTime() != null){
+									cell.setCellValue(downloadStatistic.getToReeTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 48:
+								if(downloadStatistic.getPassReeTime() != null){
+									cell.setCellValue(downloadStatistic.getPassReeTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 49:
+								if(downloadStatistic.getReeUserName() != null){
+									cell.setCellValue(downloadStatistic.getReeUserName());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 50:
+								if(downloadStatistic.getReeRebuckCount() != null){
+									cell.setCellValue(downloadStatistic.getReeRebuckCount());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 51:
+								if(downloadStatistic.getPassFilingTime() != null){
+									cell.setCellValue(downloadStatistic.getPassFilingTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 52:
+								if(downloadStatistic.getToLoanTime() != null){
+									cell.setCellValue(downloadStatistic.getToLoanTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							case 53:
+								if(downloadStatistic.getAffirmLoanTime() != null){
+									cell.setCellValue(downloadStatistic.getAffirmLoanTime());
+								}else{
+									cell.setCellValue("");
+								}
+								break;
+							default:
+								break;
+							}
+					}
+				}
+				
+			}
+			}
+		 return hwb;
+	 }
+	 */
+}
+
+	 

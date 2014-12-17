@@ -1,0 +1,123 @@
+package com.yooli.autoloan.common.util;
+
+import java.util.HashMap;
+import java.util.List;
+
+import oracle.net.aso.r;
+
+/** 
+ *
+ * Description: 
+ *
+ * @author jiexu
+ * @version 1.0
+ * <pre>
+ * Modification History: 
+ * Date         Author      Version     Description 
+ * ------------------------------------------------------------------ 
+ * 2012-8-24    jiexu       1.0        1.0 Version 
+ * </pre>
+ */
+
+public class PartApplyUtil {
+	
+	/**
+	 * 
+	 * Description: 根据分件（角色-状态）配置关系，验证所选进件状态和被分配人的角色是否匹配
+	 *
+	 * @param 
+	 * @return Boolean
+	 * @throws 
+	 * @Author jiexu
+	 * Create Date: 2012-8-27 上午09:42:24
+	 */
+	public static String RoleStatusCheck(String roleCode, String status){
+		String faceInteviewStatus = "010101,010102,010103,010104,010105,010401,010402,010403,010404,010405";//面审分件（等待面审，终审退回，面审中，复核退回，放款退回，合同签署中）
+		String appraisStatus = "020101,020102,020103,020104";//评估状态（等待评估，终审退回，定价退回，评估中）
+	 	String evaluateStatus = "020105,020106,020107";//定价状态(等待定价，重新定价)
+	 	String finalInterviewStatus = "010201,010202,010204,010205";//终审状态（等待终审，违例审批退回）
+	 	String reviewStatus = "010501,010502";//复核状态（等待复核，重新复核）
+	 	
+	 	HashMap<String, String> roleStatusMap = new HashMap<String, String>();
+	 	
+	 	roleStatusMap.put(faceInteviewStatus, "FACEINTERVIEW");//面审状态流程节点编码
+	 	roleStatusMap.put(appraisStatus, "APPRAISE");//评估状态流程节点编码
+	 	roleStatusMap.put(evaluateStatus, "EVALUATE");//定价状态流程节点编码
+	 	roleStatusMap.put(finalInterviewStatus, "FINALINTERVIEW");//终审状态流程节点编码
+	 	roleStatusMap.put(reviewStatus, "REVIEW");//复核状态流程节点编码
+	 	
+	 	roleStatusMap.put("ROLE_FACEEXAMINER_5", faceInteviewStatus);//特级面审员
+	 	roleStatusMap.put("ROLE_FACEEXAMINER_4", faceInteviewStatus);//高级面审员
+	 	roleStatusMap.put("ROLE_FACEEXAMINER_3", faceInteviewStatus);//中级面审员
+	 	roleStatusMap.put("ROLE_FACEEXAMINER_2", faceInteviewStatus);//初级面审员
+	 	roleStatusMap.put("ROLE_FACEEXAMINER_1", faceInteviewStatus);//见习面审员
+	 	
+	 	roleStatusMap.put("ROLE_APPRAISER_5", appraisStatus);//特级评估师
+	 	roleStatusMap.put("ROLE_APPRAISER_4", appraisStatus);//高级评估师
+	 	roleStatusMap.put("ROLE_APPRAISER_3", appraisStatus);//中级评估师
+	 	roleStatusMap.put("ROLE_APPRAISER_2", appraisStatus);//初级评估师
+	 	roleStatusMap.put("ROLE_APPRAISER_1", appraisStatus);//见习评估师
+	 	
+	 	roleStatusMap.put("ROLE_PRICINGCENTER_5", evaluateStatus);//特级定价员
+	 	roleStatusMap.put("ROLE_PRICINGCENTER_4", evaluateStatus);//高级定价员
+	 	roleStatusMap.put("ROLE_PRICINGCENTER_3", evaluateStatus);//中级定价员
+	 	roleStatusMap.put("ROLE_PRICINGCENTER_2", evaluateStatus);//初级定价员
+	 	roleStatusMap.put("ROLE_PRICINGCENTER_1", evaluateStatus);//见习定价员
+	 	
+	 	roleStatusMap.put("ROLE_LASTEXAMINER_5", finalInterviewStatus);//特级终审员
+	 	roleStatusMap.put("ROLE_LASTEXAMINER_4", finalInterviewStatus);//高级终审员
+	 	roleStatusMap.put("ROLE_LASTEXAMINER_3", finalInterviewStatus);//中级终审员
+	 	roleStatusMap.put("ROLE_LASTEXAMINER_2", finalInterviewStatus);//初级终审员
+	 	roleStatusMap.put("ROLE_LASTEXAMINER_1", finalInterviewStatus);//见习终审员
+	 	
+	 	roleStatusMap.put("ROLE_SALECS", reviewStatus);//销客（复核人员）
+	 	
+	 	roleStatusMap.put("ROLE_CITYMANAGER", faceInteviewStatus+","+appraisStatus);//城市经理（拥有面审、评估的所有操作权限）
+	 	
+	 	if(roleStatusMap.containsKey(roleCode)){
+	 		String roleCodes = roleStatusMap.get(roleCode);
+	 		if((","+roleCodes+",").indexOf(","+status+",") == -1){
+	 			return "fail";
+	 		}else{
+	 			String statusString[] = {faceInteviewStatus,appraisStatus,evaluateStatus,finalInterviewStatus,reviewStatus};
+	 			for(int i=0; i<statusString.length;i++){
+	 				if((","+roleCodes+",").indexOf(","+statusString[i]+",") != -1){
+	 					return roleStatusMap.get(statusString[i]); 
+	 				}
+	 			}
+	 		}
+	 	}else{
+	 		return "fail";
+	 	}
+	 	return "fail";
+	}
+	
+	/**
+	 * 
+	 * Description: 判断当前登录人是否有分件权限
+	 *
+	 * @param List<String> tAuthoritiesList角色列表
+	 * @param String nodeStatus 流程节点
+	 * @return Boolean
+	 * @throws 
+	 * @Author jiexu
+	 * Create Date: 2012-8-30 上午10:20:11
+	 */
+	public static Boolean  userNodeAssign(List<String> tAuthoritiesList,String nodeStatus){
+		HashMap<String, String> userRoleMap = new HashMap<String, String>();
+		userRoleMap.put("FACEINTERVIEW", "ROLE_CITYMANAGER");//面审节点————城市经理
+		userRoleMap.put("APPRAISE", "ROLE_CITYMANAGER");//评估节点————城市经理
+		userRoleMap.put("EVALUATE", "ROLE_PRICINGASSIGN");//定价节点————定价分件
+		userRoleMap.put("FINALINTERVIEW", "ROLE_LASTEXAMINE_ASSIGN");//终审节点————终审分件
+		userRoleMap.put("REVIEW", "ROLE_REVIEW_ASSIGN");//复核节点————复核分件
+		userRoleMap.put("BUCKLEROW", "ROLE_CITYMANAGER");//复核节点————复核分件
+		String roleName = userRoleMap.get(nodeStatus);
+		
+		if(tAuthoritiesList.contains(roleName)){
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+}

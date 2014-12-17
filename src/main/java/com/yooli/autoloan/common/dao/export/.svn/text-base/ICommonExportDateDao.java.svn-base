@@ -1,0 +1,18 @@
+package com.creditease.website.common.dao.export;
+
+import java.util.List;
+
+import com.creditease.website.common.page.Entity;
+
+public interface ICommonExportDateDao {
+	
+	/**
+	 * 分批查询导出数据
+	 * @param statementName
+	 * @param skipResults
+	 * @param maxResults
+	 * @return
+	 */
+	public List getExportDate(String statementName,Entity entity,int skipResults,int maxResults);
+	
+}

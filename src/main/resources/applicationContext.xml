@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:aop="http://www.springframework.org/schema/aop"
+     xmlns:tx="http://www.springframework.org/schema/tx"
+     xmlns:context ="http://www.springframework.org/schema/context"
+     xmlns:task ="http://www.springframework.org/schema/task"
+     xmlns:p="http://www.springframework.org/schema/p"
+     xmlns:cache="http://www.springframework.org/schema/cache"
+     xsi:schemaLocation="
+	     http://www.springframework.org/schema/beans 
+	     http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	     http://www.springframework.org/schema/tx
+	     http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+	     http://www.springframework.org/schema/aop 
+	     http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+         http://www.springframework.org/schema/context    
+         http://www.springframework.org/schema/context/spring-context-3.1.xsd
+         http://www.springframework.org/schema/task
+         http://www.springframework.org/schema/task/spring-task-3.1.xsd
+         http://www.springframework.org/schema/cache
+		 http://www.springframework.org/schema/cache/spring-cache.xsd">
+  
+  	<!-- 启动对@AspectJ注解的支持 -->   
+    <aop:aspectj-autoproxy/>
+    
+  	<!-- 加载配置文件 -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:/config.properties</value>
+				<value>classpath:/global.properties</value>
+			</list>
+		</property>
+	</bean>
+  	
+  	<!-- 读取配置文件类 -->
+	<bean id="propertyFactory" class="com.yooli.autoloan.common.PropertyFactory">
+		<constructor-arg>
+			<list>
+				<value>/config.properties</value>
+				<value>/global.properties</value>
+				
+			</list>
+		</constructor-arg>
+    </bean>
+  	
+  	<bean id="locationFilter" class="com.yooli.autoloan.common.filter.LocationFilter"/>
+  	
+  	<!-- 自动搜索并注入 -->
+	<context:component-scan  base-package ="com.yooli.autoloan.**.service,com.yooli.autoloan.**.dao,com.yooli.autoloan.common.base.push,com.yooli.autoloan.common.scheduals"/>
+	
+	<!-- 配置事务特性 -->
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+		  <tx:method name="create*" propagation="REQUIRED" rollback-for="Exception"/>
+		  <tx:method name="delete*" propagation="REQUIRED" rollback-for="Exception"/>
+		  <tx:method name="update*" propagation="REQUIRED" rollback-for="Exception"/>
+		  <tx:method name="save*" propagation="REQUIRED" rollback-for="Exception"/>
+		  <tx:method name="*" read-only="true"/>
+		</tx:attributes>
+	</tx:advice>
+	
+	<!-- 配置所有Service中的方法需要进行事务管理 -->
+	<aop:config>
+		<aop:pointcut id="allServices" expression="execution(* com.yooli.autoloan.**.service..*(..))"/>
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="allServices"/>
+	</aop:config>
+	
+	<!-- 数据源配置  JNDI方式-->
+	<!-- 
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName">
+			<value>java:comp/env/jdbc/collection</value>
+		</property>
+  	</bean>
+  	 -->
+  	<!-- 数据源配置  非JNDI方式 -->
+  	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<!-- 驱动程序 -->
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="initialSize" value="${jdbc.initialSize}" />
+		<property name="maxActive" value="${jdbc.maxActive}" />
+		<property name="maxWait" value="${jdbc.maxWait}" />
+		<property name="poolPreparedStatements" value="${jdbc.poolPreparedStatements}" />
+		<property name="defaultAutoCommit" value="false" />
+	</bean>
+	
+	
+	<!-- 配置第二个数据源 -->
+	<!--  
+	<bean id="dataSourceYCD" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${jdbc2.driverClassName}" />
+		<property name="url" value="${jdbc2.url}" />
+		<property name="username" value="${jdbc2.username}" />
+		<property name="password" value="${jdbc2.password}" />
+		<property name="initialSize" value="${jdbc2.initialSize}" />
+		<property name="maxActive" value="${jdbc2.maxActive}" />
+		<property name="maxWait" value="${jdbc2.maxWait}" />
+		<property name="poolPreparedStatements" value="${jdbc2.poolPreparedStatements}" />
+		<property name="defaultAutoCommit" value="false" />
+	</bean>
+	  -->
+	
+	<!-- 大字段处理 -->
+	<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" />
+  	
+  	<!-- 在spring配置文件中添加线程池的配置信息 -->
+  	<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"> 
+	    <property name="corePoolSize" value="3" /> 
+	    <property name="keepAliveSeconds" value="200" /> 
+	    <property name="maxPoolSize" value="5" /> 
+	    <property name="queueCapacity" value="25" /> 
+	</bean>
+	<!-- 事务管理器 -->
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<bean id="sqlExecutor" class="com.yooli.autoloan.common.dao.ibatis.LimitSqlExecutor">
+		<property name="dialect">
+			<bean class="com.yooli.autoloan.common.dao.ibatis.OracleDialect" />
+		</property>
+	</bean>
+	
+	<!-- SQLMap 配置 -->
+  	<bean id="sqlMapClient" class="com.yooli.autoloan.common.dao.ibatis.SqlMapClientFactoryBean">
+    	<property name="configLocation">
+      		<value>classpath:/ibatis/sql-map-config.xml</value>
+    	</property>
+    	<property name="dataSource"  ref="dataSource"/>
+  		<property name="sqlExecutor" ref="sqlExecutor"/>
+  		<property name="lobHandler" ref="lobHandler"/>
+  	</bean>
+  	
+  	<!-- 第二个数据连接 -->
+  	<!-- 
+  	<bean id="sqlMapClientYCD" class="com.yooli.autoloan.common.dao.ibatis.SqlMapClientFactoryBean">
+  		<property name="configLocation">
+  			<value>classpath:/ibatis/sql-map-config-ycd.xml</value>
+  		</property>
+  		<property name="dataSource"  ref="dataSourceYCD"/>
+  		<property name="sqlExecutor" ref="sqlExecutor"/>
+  		<property name="lobHandler" ref="lobHandler"/>
+  	</bean>
+    -->
+  
+  	<!-- 定时器 -->
+  	<task:executor id="executor" pool-size="5" />  
+	<task:scheduler id="scheduler" pool-size="10" />  
+	<task:annotation-driven executor="executor" scheduler="scheduler" />
+	
+	
+	<!-- 启动EHCache -->
+    <cache:annotation-driven />
+    
+	<!-- cacheManager工厂类 -->  
+	<bean id="cacheManagerFactory" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"  
+    	p:configLocation="classpath:ehcache.xml"
+		p:shared="false" />
+		
+	<!-- 声明cacheManager -->  
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager"
+	   p:cacheManager-ref="cacheManagerFactory"/>
+	
+	<!-- WebService定义 -->
+	<import resource="applicationContext-ws-client.xml" />
+	<!--服务端WebService配置文件 
+	<import resource="applicationContext-ws-server.xml" /> -->
+	
+</beans>

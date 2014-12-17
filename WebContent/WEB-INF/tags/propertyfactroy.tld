@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee web-jsptaglibrary_2_0.xsd"
+	version="2.0">
+
+	<!-- 作用：在页面上获取config.properties中的配置 使用方法： 1. 在JSP中添加taglib指令 <%@ taglib 
+		uri="/pf" prefix="pf"%> 2. 用法例如 ${pf:getProperty("name")或者 <c:out value='${pf:getProperty("name")}'/> -->
+
+	<description>propertyfactroy functions library</description>
+	<display-name>propertyfactroy functions</display-name>
+	<tlib-version>1.0</tlib-version>
+	<short-name>pf</short-name>
+
+	<function>
+		<name>getProperty</name>
+		<function-class>com.creditease.collection.common.PropertyFactory</function-class>
+		<function-signature>java.lang.String getProperty(java.lang.String)</function-signature>
+	</function>
+
+</taglib>

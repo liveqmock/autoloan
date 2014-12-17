@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="vdss" default="war" basedir=".">
+	
+	<!-- Initialization -->
+	<property environment="env" />
+	<property name="src.dir" location="${basedir}/src/main/java" />
+	<property name="conf.dir" location="${basedir}/src/main/resources" />
+	
+	<property name="webdir.name" value="WebContent" />
+
+	<property name="compilelib.dir" location="${basedir}/${webdir.name}/WEB-INF/lib" />
+	<property name="tomcatlib.dir" location="${env.TOMCAT_HOME}/lib" />
+
+	<property name="build.dir" location="../build" />
+    <property name="build.dest" location="${build.dir}/classes"/>
+
+	<!-- deploy environment configuration -->
+	<property file="../env_Vdss/${ci.properties}" />
+
+	<!-- =================================================================== -->
+	<!-- setup classpath                                                     -->
+	<!-- =================================================================== -->
+	<path id="classpath.common">
+		<fileset dir="${compilelib.dir}">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${tomcatlib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<delete dir="${build.dir}"/>
+	</target>
+
+	<target name="prepare">	
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${build.dest}"/>		
+	</target>
+	
+	<!-- =================================================================== -->
+	<!-- Compiles the source directory                                       -->
+	<!-- =================================================================== -->
+	<target name="compile" >
+		<javac srcdir="${src.dir}" 
+			destdir="${build.dest}" 
+			deprecation="off" 
+			debug="on" 
+			encoding="UTF-8"
+			fork="true"
+			memoryMaximumSize="1024m"
+			includeantruntime="on">
+			<classpath refid="classpath.common"/>
+		</javac>
+
+		<copy todir="${build.dest}">
+			<fileset dir="${conf.dir}"/>
+			<fileset dir="${src.dir}" excludes="**/*.java"/>
+		</copy>
+	</target>
+
+	<!-- =================================================================== -->
+	<!-- configure properties for test environment                           -->
+	<!-- =================================================================== -->
+	<target name="configure" >
+		<replaceregexp file="${build.dest}/config.properties" match="jdbc.url( *)=(.*)" replace="jdbc.url=${jdbc.url}" byline="true"/> 
+		<replaceregexp file="${build.dest}/config.properties" match="jdbc.username( *)=(.*)" replace="jdbc.username=${jdbc.username}" byline="true"/>
+		<replaceregexp file="${build.dest}/config.properties" match="jdbc.password( *)=(.*)" replace="jdbc.password=${jdbc.password}" byline="true"/>
+		<replaceregexp file="${build.dest}/config.properties" match="casserver.url( *)=(.*)" replace="casserver.url=${casserver.url}" byline="true"/>		
+		<replaceregexp file="${build.dest}/config.properties" match="system.url( *)=(.*)" replace="system.url=${system.url}" byline="true"/>
+		<replaceregexp file="${build.dest}/config.properties" match="ws.client.address.userAutService( *)=(.*)" replace="ws.client.address.userAutService=${ws.client.address.userAutService}" byline="true"/>
+		<replaceregexp file="${build.dest}/config.properties" match="ws.client.address.dictionaryService( *)=(.*)" replace="ws.client.address.dictionaryService=${ws.client.address.dictionaryService}" byline="true"/>
+		<replaceregexp file="${build.dest}/config.properties" match="ws.client.address.organizeService( *)=(.*)" replace="ws.client.address.organizeService=${ws.client.address.organizeService}" byline="true"/>
+		<replaceregexp file="${build.dest}/config.properties" match="ws.client.address.employeeService( *)=(.*)" replace="ws.client.address.employeeService=${ws.client.address.employeeService}" byline="true"/>
+		<replaceregexp file="${build.dest}/config.properties" match="ws.client.address.clicService( *)=(.*)" replace="ws.client.address.clicService=${ws.client.address.clicService}" byline="true"/>
+		<replaceregexp file="${build.dest}/config.properties" match="ws.client.address.afterLoanService( *)=(.*)" replace="ws.client.address.afterLoanService=${ws.client.address.afterLoanService}" byline="true"/>
+		<replaceregexp file="${build.dest}/config.properties" match="ws.client.address.borrowsaleService( *)=(.*)" replace="ws.client.address.borrowsaleService=${ws.client.address.borrowsaleService}" byline="true"/>
+		<replaceregexp file="${build.dest}/config.properties" match="ws.client.address.IPersonWS( *)=(.*)" replace="ws.client.address.IPersonWS=${ws.client.address.IPersonWS}" byline="true"/>
+		<replaceregexp file="${build.dest}/config.properties" match="ws.client.address.SearchFraudInfo( *)=(.*)" replace="ws.client.address.SearchFraudInfo=${ws.client.address.SearchFraudInfo}" byline="true"/>
+		<replaceregexp file="${build.dest}/config.properties" match="ws.client.address.messageService( *)=(.*)" replace="ws.client.address.messageService=${ws.client.address.messageService}" byline="true"/>			
+	</target>
+
+	<!-- =================================================================== -->
+	<!-- Package application as a WAR file                                   -->
+	<!-- =================================================================== -->
+	<target name="war" >
+		<war destfile="${build.dir}/${ant.project.name}.war" webxml="${basedir}/${webdir.name}/WEB-INF/web.xml">
+			<fileset dir="${basedir}/${webdir.name}" />
+			<classes dir="${build.dest}" />
+		</war>				
+	</target>
+	
+	<target name="scp" >
+		<sshexec host="${remote.ip}" username="${remote.username}" port="${remote.port}" password="${remote.password}" command="${remote.tomcat}/bin/shutdown.sh" trust="yes"/>
+		<sshexec host="${remote.ip}" username="${remote.username}" port="${remote.port}" password="${remote.password}" command="sleep 20" trust="yes"/>
+		<sshexec host="${remote.ip}" username="${remote.username}" port="${remote.port}" password="${remote.password}" command="rm -rf ${remote.tomcat}/webapps/${ant.project.name}*" trust="yes"/>
+		<scp file="${build.dir}/${ant.project.name}.war" port="${remote.port}" todir="${remote.username}:${remote.password}@${remote.ip}:${remote.tomcat}/webapps" trust="yes"/>
+		<sshexec host="${remote.ip}" username="${remote.username}" port="${remote.port}" password="${remote.password}" command="${remote.tomcat}/bin/startup.sh" trust="yes"/>
+	</target>
+
+	<!-- =================================================================== -->
+    <!-- CI target                                                           -->
+    <!-- =================================================================== -->
+	<target name="package" depends="clean,prepare,compile,war"/>
+        
+	<target name="env_package" depends="clean,prepare,compile,configure,war"/>
+
+    <target name="uat_scp_deploy" depends="clean,prepare,compile,configure,war,scp"/>
+
+</project>

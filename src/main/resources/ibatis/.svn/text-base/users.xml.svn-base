@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="users">
+	<typeAlias alias="users" type="com.creditease.website.backstage.user.domain.UserManagement" />
+	
+	<insert id="addUsers" parameterClass="users">
+         INSERT INTO USE_RMANAGEMENT (
+         	ID
+			<isNotEmpty property="userId">,USER_ID</isNotEmpty>
+			<isNotEmpty property="password">,PASSWORD</isNotEmpty>
+			<isNotEmpty property="nickName">,NICK_NAME</isNotEmpty>
+			<isNotEmpty property="status">,STATUS</isNotEmpty>
+			<isNotEmpty property="authority">,AUTHORITY</isNotEmpty>
+			<isNotEmpty property="userType">,USER_TYPE</isNotEmpty>
+			<isNotEmpty property="businessLicence">,BUSINESS_LICENCE</isNotEmpty>
+			<isNotEmpty property="age">,AGE</isNotEmpty>
+			<isNotEmpty property="name">,NAME</isNotEmpty>
+			<isNotEmpty property="telephone">,TELEPHONE</isNotEmpty>
+			<isNotEmpty property="email">,EMAIL</isNotEmpty>
+			<isNotEmpty property="city">,CITY</isNotEmpty>
+			<isNotEmpty property="qq">,QQ</isNotEmpty>
+			<isNotEmpty property="xinLang">,XIN_LANG</isNotEmpty>
+			<isNotEmpty property="products">,PRODUCTS</isNotEmpty>
+			<isNotEmpty property="registeredCapital">,REGISTERED_CAPITAL</isNotEmpty>
+			<isNotEmpty property="intent">,INTENT</isNotEmpty>
+			,REGISTRATION_TIME
+		<![CDATA[
+			) VALUES (
+		]]>
+			#id#
+			<isNotEmpty property="userId">,#userId#</isNotEmpty>
+			<isNotEmpty property="password">,#password#</isNotEmpty>
+			<isNotEmpty property="nickName">,#nickName#</isNotEmpty>
+			<isNotEmpty property="status">,#status#</isNotEmpty>
+			<isNotEmpty property="authority">,#authority#</isNotEmpty>
+			<isNotEmpty property="userType">,#userType#</isNotEmpty>
+			<isNotEmpty property="businessLicence">,#businessLicence#</isNotEmpty>
+			<isNotEmpty property="age">,#age#</isNotEmpty>
+			<isNotEmpty property="name">,#name#</isNotEmpty>
+			<isNotEmpty property="telephone">,#telephone#</isNotEmpty>
+			<isNotEmpty property="email">,#email#</isNotEmpty>
+			<isNotEmpty property="city">,#city#</isNotEmpty>
+			<isNotEmpty property="qq">,#qq#</isNotEmpty>
+			<isNotEmpty property="xinLang">,#xinLang#</isNotEmpty>
+			<isNotEmpty property="products">,#products#</isNotEmpty>
+			<isNotEmpty property="registeredCapital">,#registeredCapital#</isNotEmpty>
+			<isNotEmpty property="intent">,#intent#</isNotEmpty>
+			,now()
+		<![CDATA[
+	    	)
+	    ]]>
+		<selectKey resultClass="long" keyProperty="id" >
+			SELECT LAST_INSERT_ID() from USE_RMANAGEMENT LIMIT 1  ;
+		</selectKey>
+	</insert>
+	
+	<select id="findUserByUserId" parameterClass="String" resultClass="users" >
+    	SELECT 
+    		userManagement.ID 						as id, 
+    		userManagement.USER_ID 					as userId,
+    		userManagement.PASSWORD 				as password,
+    		userManagement.NICK_NAME 				as nickName,
+    		userManagement.STATUS 					as status,
+    		userManagement.AUTHORITY 				as authority,
+    		userManagement.USER_TYPE 				as userType,
+    		userManagement.BUSINESS_LICENCE 		as businessLicence,
+    		userManagement.AGE 						as age,
+    		userManagement.NAME 					as name,
+    		userManagement.TELEPHONE 				as telephone,
+    		userManagement.EMAIL 					as email,
+    		userManagement.CITY 					as city,
+    		userManagement.QQ 						as qq,
+    		userManagement.XIN_LANG 				as xinLang,
+    		userManagement.PRODUCTS 				as products,
+    		userManagement.REGISTERED_CAPITAL 		as registeredCapital,
+    		userManagement.INTENT 					as intent,
+    		userManagement.REGISTRATION_TIME 		as registrationTime
+    	FROM 
+    		USE_RMANAGEMENT userManagement 
+    	WHERE 
+        	userManagement.USER_ID = #userId# 
+	</select>
+	
+	<select id="findUserByLogin" parameterClass="map" resultClass="users" >
+    	SELECT 
+    		userManagement.ID 						as id, 
+    		userManagement.USER_ID 					as userId,
+    		userManagement.PASSWORD 				as password,
+    		userManagement.NICK_NAME 				as nickName,
+    		userManagement.STATUS 					as status,
+    		userManagement.AUTHORITY 				as authority,
+    		userManagement.USER_TYPE 				as userType,
+    		userManagement.BUSINESS_LICENCE 		as businessLicence,
+    		userManagement.AGE 						as age,
+    		userManagement.NAME 					as name,
+    		userManagement.TELEPHONE 				as telephone,
+    		userManagement.EMAIL 					as email,
+    		userManagement.CITY 					as city,
+    		userManagement.QQ 						as qq,
+    		userManagement.XIN_LANG 				as xinLang,
+    		userManagement.PRODUCTS 				as products,
+    		userManagement.REGISTERED_CAPITAL 		as registeredCapital,
+    		userManagement.INTENT 					as intent,
+    		userManagement.REGISTRATION_TIME 		as registrationTime
+    	FROM 
+    		USE_RMANAGEMENT userManagement 
+    	WHERE 
+        	userManagement.USER_ID = #userId# 
+        	and userManagement.PASSWORD = #password#
+	</select>
+	
+	<select id="queryUsersCountByConditions" parameterClass="map" resultClass="Integer" >
+    	SELECT 
+    		userManagement.ID 
+    	FROM 
+    		USE_RMANAGEMENT userManagement 
+    	WHERE 1=1 
+        <isNotEmpty prepend="and" property="id">
+        	userManagement.ID = #id# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="userId">
+        	userManagement.USER_ID = #userId# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="password">
+        	userManagement.PASSWORD = #password# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="nickName">
+        	userManagement.NICK_NAME = #nickName# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="status">
+        	userManagement.STATUS = #status# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="authority">
+        	userManagement.AUTHORITY = #authority# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="userType">
+        	userManagement.USER_TYPE = #userType# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="businessLicence">
+        	userManagement.BUSINESS_LICENCE = #businessLicence# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="age">
+        	userManagement.AGE = #age# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="name">
+        	userManagement.NAME = #name# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="telephone">
+        	userManagement.TELEPHONE = #telephone# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="email">
+        	userManagement.EMAIL = #email# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="city">
+        	userManagement.CITY = #city# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="qq">
+        	userManagement.QQ = #qq# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="xinLang">
+        	userManagement.XIN_LANG = #xinLang# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="products">
+        	userManagement.PRODUCTS = #products# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="registeredCapital">
+        	userManagement.REGISTERED_CAPITAL = #registeredCapital# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="intent">
+        	userManagement.INTENT = #intent# 
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="registrationTime">
+        	<![CDATA[userManagement.REGISTRATION_TIME = to_date(#registrationTime#,'yyyy-mm-dd hh24:mi:ss')]]> 
+        </isNotEmpty>
+	</select>
+	
+</sqlMap>

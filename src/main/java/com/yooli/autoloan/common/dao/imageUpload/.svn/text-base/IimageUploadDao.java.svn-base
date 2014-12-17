@@ -1,0 +1,110 @@
+/* 
+ * Copyright (C) 2006-2012 普信恒业科技发展（北京）有限公司.
+ *
+ * 本系统是商用软件,未经授权擅自复制或传播本程序的部分或全部将是非法的.
+ *
+ * ============================================================
+ *
+ * FileName: IimageUploadDao.java 
+ *
+ * Created: [2012-9-5 上午10:59:47] by pgq 
+ *
+ * $Id$
+ * 
+ * $Revision$
+ *
+ * $Author$
+ *
+ * $Date$
+ *
+ * ============================================================ 
+ * 
+ * ProjectName: AutoLoan 
+ * 
+ * Description: 
+ * 
+ * ==========================================================*/
+
+package com.creditease.website.common.dao.imageUpload;
+
+import java.util.List;
+import java.util.Map;
+
+import com.creditease.website.common.domain.ApplyUploadRel;
+import com.creditease.website.common.domain.FilePath;
+import com.creditease.website.common.domain.UploadRecord;
+
+/** 
+ *
+ * Description: 
+ *
+ * @author pgq
+ * @version 1.0
+ * <pre>
+ * Modification History: 
+ * Date         Author      Version     Description 
+ * ------------------------------------------------------------------ 
+ * 2012-9-5    pgq       1.0        1.0 Version 
+ * </pre>
+ */
+
+public interface IimageUploadDao {
+	
+	/**保存上传记录**/
+	public Long saveUploadRecord(UploadRecord uploadRecord);
+	/**保存上传记录关系表**/
+	public void saveAppUploadRel(ApplyUploadRel appUploadRel);
+	/**更新上传记录关系表**/
+	public  void uploadRecord(Map<String, String> map);
+	/**更新上传记录表**/
+	public  void uploadApplyUploadRel(Map<String, String> map);
+	/**通过进件查找路径**/
+	public  List<ApplyUploadRel> getApplyPath(ApplyUploadRel applyUploadRel);
+	/**统计文件数量**/
+	public  Integer getCountFile(String applyID);
+	/**得到所有文件路径**/
+	public  List<UploadRecord> getRecordInfoByApplyID(String applyID);
+
+	public  UploadRecord getRecordInfoByID(Integer idnumber);
+	
+	public void deleteApplyUploadRelByid(String appluRelID);
+
+	public Integer countUploadImage(ApplyUploadRel applyUploadRel);
+	
+	public ApplyUploadRel getApplyUploadRelById(Long uploadrelID);
+	/**删除该进件的某一类型图片*/
+	public void deleteImageByAttachtype(ApplyUploadRel applyUploadRel);
+	
+	public List<ApplyUploadRel> getApplyUploadRelsByID(String idList);
+	
+	
+	
+	
+	
+	/**
+	* Description
+	*  保存新增文件
+	*@return void
+	*@author wgs
+	*@createTime 2013-11-6
+	*/
+	public void insertIntoFilePath(FilePath filePath);
+	
+	/**
+	* Description
+	*  删除文件
+	*@return Integer
+	*@author wgs
+	*@createTime 2013-11-6
+	*/
+	public Integer deleteFilePath(FilePath filePath);
+	
+	/**
+	* Description
+	*  获取文件路径集合
+	*@return List<FilePath>
+	*@author wgs
+	*@createTime 2013-11-6
+	*/
+	public List<FilePath> getFilePathByFilePath(FilePath filePath);
+}

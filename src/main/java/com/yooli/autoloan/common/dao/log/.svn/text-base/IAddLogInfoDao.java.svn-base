@@ -1,0 +1,14 @@
+package com.creditease.website.common.dao.log;
+
+import com.creditease.website.common.dao.log.domain.OperateLog;
+import com.creditease.website.common.page.Entity;
+
+public interface IAddLogInfoDao{
+
+	/**
+	 * 添加日志
+	 * @param statmentName
+	 * @param entity
+	 */
+	public void addLogInfo(String statementName,OperateLog entity);
+}

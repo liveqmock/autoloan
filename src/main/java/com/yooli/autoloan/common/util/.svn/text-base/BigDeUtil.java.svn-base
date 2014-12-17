@@ -1,0 +1,56 @@
+/* 
+ * Copyright (C) 2006-2013 普信恒业科技发展（北京）有限公司.
+ *
+ * 本系统是商用软件,未经授权擅自复制或传播本程序的部分或全部将是非法的.
+ *
+ * ============================================================
+ *
+ * FileName: BigDeUtil.java 
+ *
+ * Created: [2013-5-3 下午06:18:54] by Honest 
+ *
+ * $Id$
+ * 
+ * $Revision$
+ *
+ * $Author$
+ *
+ * $Date$
+ *
+ * ============================================================ 
+ * 
+ * ProjectName: Autoloan_Lease 
+ * 
+ * Description: 
+ * 
+ * ==========================================================*/
+
+package com.creditease.website.common.util;
+
+import java.math.BigDecimal;
+
+/** 
+ *
+ * Description: 
+ *
+ * @author Honest
+ * @version 1.0
+ * <pre>
+ * Modification History: 
+ * Date         Author      Version     Description 
+ * ------------------------------------------------------------------ 
+ * 2013-5-3    Honest       1.0        1.0 Version 
+ * </pre>
+ */
+
+public class BigDeUtil {
+	
+	public  static  String transitionStr(Double value){
+		String num  = Double.toString(value);
+		BigDecimal bdevaluateSum = new BigDecimal(num).setScale(2, BigDecimal.ROUND_HALF_UP);
+		String sumString = bdevaluateSum.toString();
+		return sumString;
+	}
+
+
+}

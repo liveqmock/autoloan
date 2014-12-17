@@ -1,0 +1,27 @@
+package com.creditease.website.common.dao.export.impl;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.creditease.website.common.dao.export.ICommonExportDateDao;
+import com.creditease.website.common.dao.ibatis.IBatisBaseDao;
+import com.creditease.website.common.page.Entity;
+
+@Component
+public class CommonExportDateDaoImpl extends IBatisBaseDao implements ICommonExportDateDao {
+	
+	/**
+	 * 分批查询导出数据
+	 * @param statementName
+	 * @param skipResults
+	 * @param maxResults
+	 * @return
+	 */
+	public List getExportDate(String statementName,Entity entity,int skipResults,int maxResults){
+		List list = null;
+		list = this.getSqlMapClientTemplate().queryForList("accountMgt." + statementName,entity,skipResults,maxResults);
+		return list;
+	}
+
+}

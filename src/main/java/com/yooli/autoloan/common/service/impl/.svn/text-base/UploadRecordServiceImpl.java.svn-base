@@ -1,0 +1,432 @@
+/* 
+ * Copyright (C) 2006-2012 普信恒业科技发展（北京）有限公司.
+ *
+ * 本系统是商用软件,未经授权擅自复制或传播本程序的部分或全部将是非法的.
+ *
+ * ============================================================
+ *
+ * FileName: UploadRecordServiceImpl.java 
+ *
+ * Created: [2012-9-5 上午11:28:11] by pgq 
+ *
+ * $Id$
+ * 
+ * $Revision$
+ *
+ * $Author$
+ *
+ * $Date$
+ *
+ * ============================================================ 
+ * 
+ * ProjectName: AutoLoan 
+ * 
+ * Description: 
+ * 
+ * ==========================================================*/
+
+package com.creditease.website.common.service.impl;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.imageio.ImageIO;
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.creditease.website.common.PropertyFactory;
+import com.creditease.website.common.dao.imageUpload.IimageUploadDao;
+import com.creditease.website.common.domain.ApplyUploadRel;
+import com.creditease.website.common.domain.FilePath;
+import com.creditease.website.common.domain.UploadRecord;
+import com.creditease.website.common.domain.User;
+import com.creditease.website.common.service.UploadRecordService;
+import com.creditease.website.common.util.FileUtil;
+import com.creditease.website.common.util.ImageUnit;
+
+
+/** 
+ *
+ * Description: 
+ *
+ * @author pgq
+ * @version 1.0
+ * <pre>
+ * Modification History: 
+ * Date         Author      Version     Description 
+ * ------------------------------------------------------------------ 
+ * 2012-9-5    pgq       1.0        1.0 Version 
+ * </pre>
+ */
+@Component
+public class UploadRecordServiceImpl implements UploadRecordService {
+	
+	
+	public static final String[] UPLOADFILETYPE = {"PDF","DOC","DOCX","TXT","XLS","XLSX","JPG","JPEG","PNG"};
+	public static final String UPLOADFILETYPE_STRING = "PDF,DOC,DOCX,TXT,XLS,XLSX,JPG,JPEG,PNG";
+	private static  String UPLOADFILE_ORG_NAME = "";
+	public static final String UPLOADSUCCESSCODE = "200";//Upload Success code
+	public static final String UPLOADSUCCESSMESSAGE = " 上传成功！";//Upload Success message
+	public static final String UPLOADFALSECODE = "500";//Upload false code 
+	public static final String UPLOADFALSEMESSAGE = " 上传失败，请联系管理员！";//Upload false message
+	public static final String UPLOADFALSEMESSAGE_TYPE = "上传失败! <br/>请选择"+UPLOADFILETYPE_STRING+"类型的文件";//Upload false message
+	public static final String DELETEFALSEMESSAGE = "删除成功!";//Upload false message
+	public static final String DELETESUCCESSMESSAGE = "删除失败!";//Upload false message
+
+	
+	private IimageUploadDao iimageUploadDao;
+	public IimageUploadDao getIimageUploadDao() {
+		return iimageUploadDao;
+	}
+	@Resource
+	public void setIimageUploadDao(IimageUploadDao iimageUploadDao) {
+		this.iimageUploadDao = iimageUploadDao;
+	}
+	
+	
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-5 上午11:28:50
+	 */
+	@SuppressWarnings("unused")
+	@Override
+	public String getImageName(MultipartFile file,User user) {
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+		String dataString = simpleDateFormat.format(new Date());
+		String fileType = "";
+		if(file!=null){
+			String name = file.getOriginalFilename();
+			String[] filename = name.split("[.]");
+			if(filename.length!=0&&filename.length>1){
+				fileType = filename[filename.length-1];
+			}
+		}
+		return file.getOriginalFilename().toLowerCase();//dataString+System.currentTimeMillis()+"_"+user.getUserId()+"."+fileType;
+	}
+
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-5 上午11:28:50
+	 */
+	@Override
+	public List<ApplyUploadRel> getUploadRecordByType(ApplyUploadRel applyUploadRel) {
+		return iimageUploadDao.getApplyPath(applyUploadRel);
+	}
+
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-5 上午11:28:50
+	 */
+	@Override
+	public Long saveRecord(UploadRecord ur) {
+		return (Long)this.iimageUploadDao.saveUploadRecord(ur);
+	}
+
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-5 下午06:49:33
+	 */
+	@Override
+	public void saveApplyRel(ApplyUploadRel applyUploadRel) {
+		this.iimageUploadDao.saveAppUploadRel(applyUploadRel);
+	}
+
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-9-6 下午05:49:10
+	 */
+	@Override
+	public String deleteimageByID(String applyRelID) {
+		String status = "false";
+		try {
+			iimageUploadDao.deleteApplyUploadRelByid(applyRelID);
+			status = "true";
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return status;
+	}
+
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2012-11-21 上午11:11:56
+	 */
+	@Override
+	public ApplyUploadRel getApplyUploadRelById(Long uploadrelID) {
+		return iimageUploadDao.getApplyUploadRelById(uploadrelID);
+	}
+	
+	/**
+	 * Description: 删除该进件的某些类型图片
+	 * @param applyUploadRel.getAttachType()类型以“,”隔开
+	 * @return 
+	 * @throws 
+	 * @Author jiexu
+	 * Create Date: 2012-12-7 上午10:20:44
+	 */
+	@Override
+	public Integer deleteImageByAttachtype(ApplyUploadRel applyUploadRel) {
+		Integer deleteNumber = 0;
+		//类型以“，”隔开
+		if(applyUploadRel.getAttachType()!=null && !applyUploadRel.getAttachType().equals("")){
+			String attachtypeStr[] = applyUploadRel.getAttachType().split(",");
+			for(int i=0;i<attachtypeStr.length;i++){
+				applyUploadRel.setAttachType(PropertyFactory.getProperty(attachtypeStr[i]));
+				//判断图片是否存在
+				List<ApplyUploadRel> applUploadRelList = iimageUploadDao.getApplyPath(applyUploadRel);
+				//如果存在则删除
+				if(applUploadRelList!=null && applUploadRelList.size()>0){
+					iimageUploadDao.deleteImageByAttachtype(applyUploadRel);
+					deleteNumber += applUploadRelList.size();
+				}
+			}
+		}
+		return deleteNumber;
+	}
+	
+	/**
+	 * Description: 根据图片id删除图片信息
+	 * @Author wangjian
+	 * Create Date: 2012-12-7 上午10:20:44
+	 */
+	@Override
+	public Integer deleteImg(String[] imgIds) {
+		Integer deleteNumber = 0;
+		for(String imgId:imgIds){
+			iimageUploadDao.deleteApplyUploadRelByid(imgId);
+			deleteNumber++;
+		}
+		return deleteNumber;
+	}
+
+	/** Description: 
+	 * @param 
+	 * @return 
+	 * @throws 
+	 * @Author pgq
+	 * Create Date: 2013-1-14 下午03:38:46
+	 */
+	@Override
+	public List<ApplyUploadRel> getApplyUploadRelsByID(String idList) {
+		return iimageUploadDao.getApplyUploadRelsByID(idList);
+	}
+	
+	/**
+	 * 根据进件ID和类型列表查询图片信息
+	 * TODO 
+	 * @param applyID 进件ID
+	 * @param types 图片类型列表 ，逗号分隔，类型来自属性文件
+	 * 
+	 * @return
+	 * @Author 王剑
+	 * Create Date: 2013-10-12
+	 */
+	public List<ApplyUploadRel> getImages(String applyID, String types) {
+		//分隔查看类型为数组
+		String[] typeArr =types.split(",");
+		//返回值
+		List<ApplyUploadRel> list=new ArrayList<ApplyUploadRel>();
+		//遍历查看类型
+		for(String type:typeArr){
+			//查询路径列表,并将结果集添加到返回集
+			ApplyUploadRel applyUploadRel = new ApplyUploadRel();
+			applyUploadRel.setInQuireId(Long.valueOf(applyID));
+			applyUploadRel.setAttachType(type);
+			list.addAll( this.getUploadRecordByType(applyUploadRel));
+		}
+ 		return list;
+	}
+
+	/**
+	 * 根据图片类型列表返回类型对应的中文描述用于页面展示
+	 * TODO 
+	 * @param types 图片类型列表 ，逗号分隔，类型来自属性文件
+	 * @return
+	 * @Author 王剑
+	 * Create Date: 2013-10-12
+	 */
+	@Override
+	public Map<String, String> getTypeCHS(String types) {
+		//分隔查看类型为数组
+		String[] typeArr =types.split(",");
+		//返回集合
+		Map<String,String> map = new HashMap<String, String>();
+		//遍历查看类型
+		for(String type:typeArr){
+			if(type=="") break;
+			//获取类型的中文描述
+			String typeCHS;
+			try {
+				typeCHS=PropertyFactory.getProperty(type+ ".CHS");
+				typeCHS=(typeCHS.length()==0)?type:typeCHS;
+				type=PropertyFactory.getProperty(type);
+				
+			} catch (Exception e){
+				typeCHS=type;
+			}
+			map.put(type, typeCHS);
+		}
+		return map;
+	}
+	/**
+	 * 保存上传的图片
+	 * 王剑
+	 * 
+	 */
+	@Override
+	public void saveImg(MultipartFile file, String applyID,String path,String relativepath,String type) {
+		//User user = SpringSecurityUtils.getCurrentUser();
+		//Apply apply  = iApplyDao.getApplyById(Long.valueOf(applyID));
+		String pathString = "";//"/"+apply.getCityId()+"/"+applyID+"/"+type;
+		String filename ="";// this.getImageName(file, user).toLowerCase();
+		try {
+			ImageUnit.saveASoriginal(ImageIO.read(file.getInputStream()), filename, path+pathString+"/max_");
+			ImageUnit.saveASthumbnails(ImageIO.read(file.getInputStream()), filename, path+pathString+"/min_", Integer.valueOf(PropertyFactory.getProperty("ImageWidth")), Integer.valueOf(PropertyFactory.getProperty("ImageHeight")), false);
+			
+			UploadRecord ur = new UploadRecord();
+			//ur.setDeptID(user.getDepartmentId().toString());
+			//ur.setDeptName(user.getDepartmentName());
+			//ur.setFileName(filename);
+			//ur.setUploadUid(user.getUserId());
+			//ur.setUploadUname(user.getUsername());
+			//ur.setRaddress(path+pathString);
+			//ur.setDeptName(user.getDepartmentName());
+			Long id = this.saveRecord(ur);
+			
+			ApplyUploadRel applyUploadRel = new ApplyUploadRel();
+			applyUploadRel.setUpid(id);
+			applyUploadRel.setInQuireId(Long.valueOf(applyID));
+			applyUploadRel.setAttachType(type.trim());
+			applyUploadRel.setAddRess(PropertyFactory.getProperty("imgfileUpload.dir")+pathString+"/"+"min_"+filename);
+			this.saveApplyRel(applyUploadRel);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	* Description
+	*  保存文件
+	*@return 
+	*@author wgs
+	*@createTime 2013-11-6
+	*/
+	@Override
+	public Map<String, String> saveFile(String fileType, MultipartFile muFile,Long applyId,String localPath,Long linkedId) {
+		String filePath = localPath+"/"+applyId+"/"+fileType+"/";
+		String relativelyPath = PropertyFactory.getProperty("fileUpload.dir")+"/"+applyId+"/"+fileType+"/";
+		Map<String, String> map = new HashMap<String, String>();
+		//判断文件是否超大，10M
+		if(null != muFile && muFile.getSize()>10485760){
+			map.put("code", UPLOADFALSECODE);
+			map.put("message", "请上传小于10M的文件");
+			return map;
+		}
+		UPLOADFILE_ORG_NAME = muFile.getOriginalFilename();
+		map.put("code", UPLOADSUCCESSCODE);
+		map.put("message", UPLOADFILE_ORG_NAME+UPLOADSUCCESSMESSAGE);
+		String uploadoriginalFilenameType = muFile.getOriginalFilename().substring(muFile.getOriginalFilename().lastIndexOf(".")+1, muFile.getOriginalFilename().length());
+		//chack File type
+		if(!this.chackFileType(uploadoriginalFilenameType)){
+			map.put("code", UPLOADFALSECODE);
+			map.put("message", UPLOADFALSEMESSAGE_TYPE);
+			return map;
+		}
+		try {
+			//保存图片并拿到新文件名
+			String newFileName = FileUtil.uploadeFile(muFile, filePath);
+			FilePath filePathBean = new FilePath();
+				filePathBean.setFilePath(relativelyPath+newFileName);
+				filePathBean.setApplyId(applyId);
+				filePathBean.setLinkedId(linkedId);
+				filePathBean.setFileType(fileType);
+				//filePathBean.setLastUpdateUserId(SpringSecurityUtils.getCurrentUser().getUserId());
+				filePathBean.setFileName(muFile.getOriginalFilename());
+				iimageUploadDao.insertIntoFilePath(filePathBean);	
+		} catch (Exception e) {
+			e.printStackTrace();
+			map.put("code", UPLOADFALSECODE);
+			map.put("message", UPLOADFALSEMESSAGE_TYPE+UPLOADFALSEMESSAGE);
+		}
+		return map;
+	}
+
+	/**
+	* Description
+	*  获取文件路径集合
+	*@return 
+	*@author wgs
+	*@createTime 2013-11-6
+	*/
+	@Override
+	public List<FilePath> getfilePath(FilePath filePath) {
+		return this.iimageUploadDao.getFilePathByFilePath(filePath);
+	}
+
+	
+	private boolean chackFileType(String fileType){
+		for (String systemType : UPLOADFILETYPE) {
+			if(systemType.toLowerCase().equals(fileType)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	* Description
+	*  删除文件
+	*@return 
+	*@author wgs
+	*@createTime 2013-11-6
+	*/
+	@Override
+	public Map<String, String> deleteFile(FilePath filePath) {
+		Map<String, String> map = new HashMap<String, String>();
+		try {
+			iimageUploadDao.deleteFilePath(filePath);
+			map.put("code", UPLOADFALSECODE);
+			map.put("message", DELETEFALSEMESSAGE);
+		} catch (Exception e) {
+			e.printStackTrace();
+			map.put("code", UPLOADSUCCESSCODE);
+			map.put("message", DELETESUCCESSMESSAGE);
+		}
+		return map;
+	}
+	
+}

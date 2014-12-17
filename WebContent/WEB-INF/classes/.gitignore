@@ -1,0 +1,11 @@
+/.DS_Store
+/applicationContext-ws-client.xml
+/applicationContext.xml
+/com/
+/config.properties
+/ehcache.xml
+/global.properties
+/ibatis/
+/log4j.properties
+/springmvc-servlet.xml
+/urlrewrite.xml

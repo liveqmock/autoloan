@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:jaxws="http://cxf.apache.org/jaxws" 
+	 xmlns:cxf="http://cxf.apache.org/core"
+     xsi:schemaLocation="
+	     http://www.springframework.org/schema/beans 
+	     http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+         http://cxf.apache.org/jaxws 
+		 http://cxf.apache.org/schemas/jaxws.xsd
+		 http://cxf.apache.org/core 
+		 http://cxf.apache.org/schemas/core.xsd "
+		 default-autowire="byType" default-lazy-init="true">
+  	
+  	<import resource="classpath:META-INF/cxf/cxf.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
+	
+  	<!-- UC提供的WebService客户端配置 -->
+  	<!-- 客户端密码配置Bean定义
+	<bean id="passwordCallback" class="com.creditease.core.ws.client.ClientValidateCallback">
+		<property name="userMap">
+			<map>
+				<entry key="admin" value="admin" />
+			</map>
+		</property>
+	</bean>
+	 -->
+	<!-- 用户权限的web service @added by Xutao, @since 2012-05-07 
+	<jaxws:client id="userAutService" serviceClass="com.creditease.core.ws.client.UserService" 
+		address="${ws.client.address.userAutService}">
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+				<property name="properties">
+					<map>
+						<entry key="action" value="UsernameToken" />
+						<entry key="user" value="admin" />
+						<entry key="passwordType" value="PasswordText" />
+						<entry key="passwordCallbackRef" value-ref="passwordCallback" />
+					</map>
+				</property>
+			</bean>
+		</jaxws:outInterceptors>
+	</jaxws:client>
+	-->
+	<!-- 数据字典WebService  @added by Xutao, @since 2012-07-31 
+	<jaxws:client id="dictionaryService" serviceClass="com.creditease.dealeras.support.ws.client.smp.DictionaryService" 
+		address="${ws.client.address.dictionaryService}">
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+				<property name="properties">
+					<map>
+						<entry key="action" value="UsernameToken" />
+						<entry key="user" value="admin" />
+						<entry key="passwordType" value="PasswordText" />
+						<entry key="passwordCallbackRef" value-ref="passwordCallback" />
+					</map>
+				</property>
+			</bean>
+		</jaxws:outInterceptors>
+	</jaxws:client>-->
+	
+	<!-- 获取组织架构的web service @added by Xutao, @since 2012-08-08 
+	<jaxws:client id="organizeWebService" serviceClass="com.creditease.dealeras.support.ws.client.smp.OrganizeWebService" 
+		 		address="${ws.client.address.organizeService}">
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+				<property name="properties">
+					<map>
+						<entry key="action" value="UsernameToken" />
+						<entry key="user" value="admin" />
+						<entry key="passwordType" value="PasswordText" />
+						<entry key="passwordCallbackRef" value-ref="passwordCallback" />
+					</map>
+				</property>
+			</bean>
+		</jaxws:outInterceptors>
+	</jaxws:client>-->
+
+	<!-- 获取员工信息的web service @added by Xutao, @since 2012-08-09 
+	<jaxws:client id="employeeService" serviceClass="com.creditease.dealeras.support.ws.client.smp.EmployeeWebService" 
+		 address="${ws.client.address.employeeService}">
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+				<property name="properties">
+					<map>
+						<entry key="action" value="UsernameToken" />
+						<entry key="user" value="admin" />
+						<entry key="passwordType" value="PasswordText" />
+						<entry key="passwordCallbackRef" value-ref="passwordCallback" />
+					</map>
+				</property>
+			</bean>
+		</jaxws:outInterceptors>
+	</jaxws:client>-->
+	
+	<!-- 贷后获取产品的接口 
+	<jaxws:client id="afterLoanService" serviceClass="com.creditease.dealeras.support.ws.client.afterloan.YCD" 
+		address="${ws.client.address.afterLoanService}">
+	</jaxws:client>-->
+	
+	<!-- 信审的webservice人法网 
+	<jaxws:client id="IPersonWS" serviceClass="com.creditease.autoloan.support.ws.client.mrg.IPersonWS" 
+		 		address="${ws.client.address.IPersonWS}">-->
+<!-- 	 <jaxws:outInterceptors>
+			<bean class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+				<property name="properties">
+					<map>
+						<entry key="action" value="UsernameToken" />
+						<entry key="user" value="admin" />
+						<entry key="passwordType" value="admin" />
+						<entry key="passwordCallbackRef" value-ref="passwordCallback" />
+					</map>
+				</property>
+			</bean>
+		</jaxws:outInterceptors> 	 	
+	</jaxws:client>
+	-->
+	<!-- 信审黑名单的的webservice
+	<jaxws:client id="BlackListCommService" serviceClass="com.creditease.rise.service.BlackListCommService" 
+		 		address="${ws.client.address.SearchFraudInfo}">
+   	 <jaxws:outInterceptors>
+			<bean class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+				<property name="properties">
+					<map>
+						<entry key="action" value="UsernameToken" />
+						<entry key="user" value="admin" />
+						<entry key="passwordType" value="PasswordText" />
+						<entry key="passwordCallbackClass" 
+						value="com.creditease.autoloan.support.common.ClientPasswordCallback" />
+					</map>
+				</property>
+			</bean>
+		</jaxws:outInterceptors> 	 	
+	</jaxws:client>-->
+	<!--  
+	<jaxws:client id="PdfService" serviceClass="com.creditease.autoloan.support.ws.client.PDF.CeBorrowingProductsWS" 
+		address="${ws.client.address.PDF}">
+	</jaxws:client>-->
+</beans>

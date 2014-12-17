@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="opinionFeedback">
+	<typeAlias alias="opinionFeedback"
+		type="com.creditease.website.backstage.opinions.domain.OpinionFeedback" />
+	<typeAlias alias="purpose"
+		type="com.creditease.website.backstage.purpose.domain.Purpose" />
+		
+		
+	<!-- 查询意见反馈表 -->
+	<select id="queryOpinionFeedbackList" parameterClass="map" resultClass="opinionFeedback">
+		SELECT
+		   ID           	    as id,
+		   USER_NAME			as username,
+		   EMAIL				as email,
+		   TELEPHONE			as telephone,
+		   SUBMIT_TIME			as submitTime,
+		   OPINION				as opinion,
+		   STATUS               as status
+		FROM OPINION_FEEDBACK 
+		where 1=1
+		<isNotEmpty prepend="and" property="submitTimeBegin">
+            <![CDATA[substr(SUBMIT_TIME,1,10) >= substr(#submitTimeBegin#,1,10)]]>
+        </isNotEmpty>
+		<isNotEmpty prepend="and" property="submitTimeEnd">
+            <![CDATA[substr(SUBMIT_TIME,1,10) <= substr(#submitTimeEnd#,1,10)]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="status">
+        	STATUS=#status#
+        </isNotEmpty>
+        order by SUBMIT_TIME desc
+	</select>
+	
+	<!-- 查询意见详细 -->
+	<select id="queryOpinionFeedback" parameterClass="Long" resultClass="opinionFeedback">
+		SELECT
+		   ID           	    as id,
+		   USER_NAME			as username,
+		   EMAIL				as email,
+		   TELEPHONE			as telephone,
+		   SUBMIT_TIME			as submitTime,
+		   OPINION				as opinion,
+		   STATUS               as status
+		FROM OPINION_FEEDBACK 
+		where ID=#id#
+	</select>
+	
+	<!-- 更新意见表状态 -->
+	<update id="updateOpinionFeedbackById" parameterClass="opinionFeedback">
+		UPDATE OPINION_FEEDBACK set STATUS=#status# where id=#id#
+	</update>
+	
+	<!-- 更新意向表状态   租赁、加盟 -->
+	<update id="updatePurposeById" parameterClass="purpose">
+		UPDATE PURPOSE set STATUS=#status# where id=#id#
+	</update>
+	
+	<!-- 根据id查询意向表  租赁、加盟信息 -->
+	<select id="queryPurposeById" parameterClass="Long" resultClass="Purpose">
+		SELECT
+		    ID                     as id,
+		    STATUS                 as status,
+		    TYPE                   as type,
+		    NAME                   as name,
+		    TELEPHONE              as telephone,
+		    PRODUCTS               as products,
+		    ADDRESS                as address,
+		    EMAIL                  as email,
+		    TRADE                  as trade,
+		    REGISTERED_CAPITAL     as registeredCapital,
+		    DESCRIPTION            as description,
+		    SUBMIT_TIME            as submitTime
+		  from PURPOSE
+		  where 1=1 and id=#id#
+	</select>
+	
+	<!-- 查询意见反馈表 数量-->
+	<select id="queryOpinionFeedbackCount" parameterClass="map" resultClass="Integer">
+		SELECT id FROM OPINION_FEEDBACK 
+		where 1=1
+		<isNotEmpty prepend="and" property="submitTimeBegin">
+            <![CDATA[substr(SUBMIT_TIME,1,10) >= substr(#submitTimeBegin#,1,10)]]>
+        </isNotEmpty>
+		<isNotEmpty prepend="and" property="submitTimeEnd">
+            <![CDATA[substr(SUBMIT_TIME,1,10) <= substr(#submitTimeEnd#,1,10)]]>
+        </isNotEmpty>
+        <isNotEmpty prepend="and" property="status">
+        	STATUS=#status#
+        </isNotEmpty>
+	</select>
+	
+	<!-- 查询意向表      加盟/租赁信息 -->
+	<select id="queryPurposeList" parameterClass="map" resultClass="Purpose">
+		SELECT
+		    ID                     as id,
+		    STATUS                 as status,
+		    TYPE                   as type,
+		    NAME                   as name,
+		    TELEPHONE              as telephone,
+		    PRODUCTS               as products,
+		    ADDRESS                as address,
+		    EMAIL                  as email,
+		    TRADE                  as trade,
+		    REGISTERED_CAPITAL     as registeredCapital,
+		    DESCRIPTION            as description,
+		    SUBMIT_TIME            as submitTime
+		  from PURPOSE
+		  where 1=1
+	   <isNotEmpty prepend="and" property="submitTimeBegin">
+           <![CDATA[substr(SUBMIT_TIME,1,10) >= substr(#submitTimeBegin#,1,10)]]>
+       </isNotEmpty>
+	   <isNotEmpty prepend="and" property="submitTimeEnd">
+        <![CDATA[substr(SUBMIT_TIME,1,10) <= substr(#submitTimeEnd#,1,10)]]>
+       </isNotEmpty>
+       <isNotEmpty prepend="and" property="status">
+        STATUS=#status#
+       </isNotEmpty>
+        and TYPE = #type#
+		order by SUBMIT_TIME desc
+	</select>
+	
+	<!-- 查询意向表      加盟/租赁信息总数 -->
+	<select id="queryPurposeCount" parameterClass="map" resultClass="Integer">
+		SELECT ID from PURPOSE 
+			where 1=1 
+		 <isNotEmpty prepend="and" property="submitTimeBegin">
+              <![CDATA[substr(SUBMIT_TIME,1,10) >= #submitTimeBegin#]]>
+       	 </isNotEmpty>
+	     <isNotEmpty prepend="and" property="submitTimeEnd">
+              <![CDATA[substr(SUBMIT_TIME,1,10) <= #submitTimeEnd#]]>
+         </isNotEmpty>
+         <isNotEmpty prepend="and" property="status">
+           STATUS=#status#
+         </isNotEmpty>
+         and TYPE = #type#
+	</select>
+	
+	<!-- 插入意向表 -->
+	<insert id="saveOpinion" parameterClass="purpose">
+		insert into PURPOSE
+		<dynamic prepend="(">
+			<isNotNull prepend=',' property='type'>
+				TYPE
+			</isNotNull>
+			<isNotNull prepend=',' property='name'>
+				NAME
+			</isNotNull>
+			<isNotNull prepend=',' property='status'>
+				STATUS
+			</isNotNull>
+			<isNotNull prepend=',' property='telephone'>
+				TELEPHONE
+			</isNotNull>
+			<isNotNull prepend=',' property='address'>
+				ADDRESS
+			</isNotNull>
+			<isNotNull prepend=',' property='email'>
+				EMAIL
+			</isNotNull>
+			<isNotNull prepend=',' property='trade'>
+				TRADE
+			</isNotNull>
+			<isNotNull prepend=',' property='registeredCapital'>
+				REGISTERED_CAPITAL
+			</isNotNull>
+			<isNotNull prepend=',' property='description'>
+				DESCRIPTION
+			</isNotNull>
+			<isNotNull prepend=',' property='products'>
+				PRODUCTS
+			</isNotNull>
+			<isNotNull prepend=',' property='submitTime'>
+				SUBMIT_TIME
+			</isNotNull>
+		</dynamic>
+		)VALUES
+			<dynamic prepend="(">
+				<isNotNull prepend=',' property='type'>
+					#type#
+            	</isNotNull>
+				<isNotNull prepend=',' property='name'>
+					#name#
+            	</isNotNull>
+				<isNotNull prepend=',' property='status'>
+					#status#
+            	</isNotNull>
+				<isNotNull prepend=',' property='telephone'>
+					#telephone#
+            	</isNotNull>
+				<isNotNull prepend=',' property='address'>
+					#address#
+            	</isNotNull>
+				<isNotNull prepend=',' property='email'>
+					#email#
+            	</isNotNull>
+				<isNotNull prepend=',' property='trade'>
+					#trade#
+            	</isNotNull>
+				<isNotNull prepend=',' property='registeredCapital'>
+					#registeredCapital#
+            	</isNotNull>
+				<isNotNull prepend=',' property='description'>
+					#description#
+            	</isNotNull>
+				<isNotNull prepend=',' property='products'>
+					#products#
+            	</isNotNull>
+				<isNotNull prepend=',' property='submitTime'>
+					#submitTime#
+            	</isNotNull>
+            	)
+			</dynamic>
+		<selectKey resultClass="Long" keyProperty="id">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<!-- 插入意见建议表 -->
+	<insert id="saveOpinionFeedback" parameterClass="opinionFeedback">
+		insert into OPINION_FEEDBACK
+		<dynamic prepend="(">
+			<isNotNull prepend=',' property='username'>
+				USER_NAME
+			</isNotNull>
+			<isNotNull prepend=',' property='email'>
+				EMAIL
+			</isNotNull>
+			<isNotNull prepend=',' property='status'>
+				STATUS
+			</isNotNull>
+			<isNotNull prepend=',' property='telephone'>
+				TELEPHONE
+			</isNotNull>
+			<isNotNull prepend=',' property='submitTime'>
+				SUBMIT_TIME
+			</isNotNull>
+			<isNotNull prepend=',' property='opinion'>
+				OPINION
+			</isNotNull>
+		</dynamic>
+		)VALUES
+			<dynamic prepend="(">
+				<isNotNull prepend=',' property='username'>
+					#username#
+	           	</isNotNull>
+				<isNotNull prepend=',' property='email'>
+					#email#
+	           	</isNotNull>
+				<isNotNull prepend=',' property='status'>
+					#status#
+	           	</isNotNull>
+				<isNotNull prepend=',' property='telephone'>
+					#telephone#
+	           	</isNotNull>
+				<isNotNull prepend=',' property='submitTime'>
+					#submitTime#
+	           	</isNotNull>
+				<isNotNull prepend=',' property='opinion'>
+					#opinion#
+	           	</isNotNull>
+	           	)
+           </dynamic>
+           <selectKey resultClass="Long" keyProperty="id">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+</sqlMap>
